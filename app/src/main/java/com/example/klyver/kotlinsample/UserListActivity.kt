@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.widget.Toast
 import kotlinx.android.synthetic.activity_github_user_list.*
 import rx.Observable
@@ -35,6 +36,9 @@ public class UserListActivity : Activity() {
                     recycler_view.setAdapter(UserListAdapter(this, list))
                 }, {
                     Toast.makeText(this, "An error happened, try again later", Toast.LENGTH_LONG).show()
+                }, {
+                    Log.e("UserListActivity", "request completed")
+                    Toast.makeText(this, "request completed", Toast.LENGTH_LONG).show()
                 })
 
     }

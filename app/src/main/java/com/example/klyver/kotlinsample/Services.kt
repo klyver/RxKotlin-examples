@@ -9,13 +9,22 @@ import retrofit.http.GET
 import retrofit.http.Path
 import retrofit.http.Query
 import rx.Observable
+import rx.lang.kotlin.observable
 import java.util.*
 
 
-interface GitHubService {
-    @GET("/users/{user}/repos")
-    fun listRepos(@Path("user") user: String, cb: Callback<JsonElement>);
+object LoginService {
 
+    fun login(email: String, password: String) = observable<Boolean> {
+        it.onNext(true)
+        it.onCompleted()
+//        it.onError()
+    }
+
+}
+
+
+interface GitHubService {
     @GET("/users/{user}")
     fun user(@Path("user") user: String): Observable<JsonElement>;
 
@@ -27,6 +36,7 @@ interface GitHubService {
 
     @GET("/search/users")
     fun searchUsers(@Query("q") query: String): Observable<JsonElement>;
+
 }
 
 
@@ -35,7 +45,6 @@ object GitHubDataProvider {
 
     val restAdapter: RestAdapter = RestAdapter.Builder().setEndpoint("https://api.github.com").build()
     val githubService: GitHubService = restAdapter.create(javaClass<GitHubService>())
-
 
     fun findUsersWithCompleteDetails(query: String): Observable<List<GithubUser>> =
         findUsers(query)

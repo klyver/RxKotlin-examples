@@ -14,7 +14,6 @@ import rx.schedulers.Schedulers
 import kotlinx.android.synthetic.activity_github_user.*
 import rx.Observable
 import rx.Subscription
-import java.util
 import java.util.concurrent.TimeUnit
 
 
@@ -30,27 +29,30 @@ public class UserDetailActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_github_user)
-        recycler_view.setLayoutManager(LinearLayoutManager(this))
-        val loginname = getIntent().getExtras().getString(EXTRA_USER_LOGIN);
+        recycler_view.layoutManager = LinearLayoutManager(this)
+        val loginname = intent.extras.getString(EXTRA_USER_LOGIN);
 //        val loginname = "benjchristensen"
 
         userDetailSubscription = GitHubDataProvider.getUser(loginname)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ g: GithubUser ->
-                    login_text_view.setText( g.login)
-                    location_text_view.setText(g.location)
-                    show_followers_button.setVisibility(View.VISIBLE)
+                    login_text_view.text = g.login
+                    location_text_view.text = g.location
+                    show_followers_button.visibility = View.VISIBLE
                 }, {
                     Toast.makeText(this, "Could not get user data, try again later", Toast.LENGTH_LONG).show()
+                }, {
+                    Log.e("UserDetailActivity", "request completed")
+                    Toast.makeText(this, "request completed", Toast.LENGTH_LONG).show()
                 })
 
 
 
 
         val clickedDetailObservable = Events.click(show_followers_button)
-        val followersReadyObservable = GitHubDataProvider.getFollowers(loginname)
-                .onErrorReturn({null})
+        val followersReadyObservable: Observable<List<GithubUser>?> = GitHubDataProvider.getFollowers(loginname)
+//                .onErrorReturn({null})
                 .subscribeOn(Schedulers.io())
 
         val clickedAndDataReadyObservable: Observable<List<GithubUser>> = Observable.zip(clickedDetailObservable, followersReadyObservable, { c, d -> d })
@@ -60,9 +62,9 @@ public class UserDetailActivity : Activity() {
                     if (it == null) {
                         Toast.makeText(this, "Could not get followers, try again later", Toast.LENGTH_LONG).show()
                     } else {
-                        show_followers_button.setVisibility(View.GONE)
-                        followers_label.setVisibility(View.VISIBLE)
-                        recycler_view.setAdapter(UserListAdapter(this, it))
+                        show_followers_button.visibility = View.GONE
+                        followers_label.visibility = View.VISIBLE
+                        recycler_view.adapter = UserListAdapter(this, it)
                     }
                 })
     }

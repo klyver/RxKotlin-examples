@@ -3,17 +3,11 @@ package com.example.klyver.kotlinsample
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.ContextMenu
-import android.view.View
-import kotlinx.android.synthetic.activity_login.*
+import android.widget.Toast
+import kotlinx.android.synthetic.activity_login.email_edit_text
+import kotlinx.android.synthetic.activity_login.login_button
+import kotlinx.android.synthetic.activity_login.password_edit_text
 import rx.Observable
-import rx.android.view.ViewObservable
-import rx.android.widget.WidgetObservable
-import rx.functions.Func2
-import rx.subjects.BehaviorSubject
-import java.util.ArrayList
 
 public class LoginActivity: Activity() {
 
@@ -21,20 +15,40 @@ public class LoginActivity: Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        login_button.setOnClickListener {
-            startActivity(Intent(this, javaClass<UserListActivity>()))
-        }
 
-        val usernameObservable = Events.text(username_edit)
-        val passwordObservable = Events.text(password_edit)
+        val usernameObservable = Events.text(email_edit_text)
+        val passwordObservable = Events.text(password_edit_text)
 
         Observable
-                .combineLatest(usernameObservable, passwordObservable, { s1, s2 -> s1 != "" && s2 != "" })
-                .subscribe({login_button.setEnabled(it)})
+                .combineLatest(usernameObservable, passwordObservable, {
+                    email, password -> validateEmail(email) && password.length() >= 4
+                }).subscribe({
+                    login_button.isEnabled = it
+                })
 
+
+        login_button.setOnClickListener {
+            val email = email_edit_text.editableText.toString()
+            val password = password_edit_text.editableText.toString()
+
+            LoginService.login(email, password)
+                    .subscribe({
+                        if (it) {
+                            startActivity(Intent(this, UserListActivity::class.java))
+                        } else {
+                            Toast.makeText(this, "Wrong email or password", Toast.LENGTH_LONG).show();
+                        }
+                    }, {
+                        Toast.makeText(this, "Something went wrong, try again later", Toast.LENGTH_LONG).show();
+                    })
+        }
 
         //        ViewObservable.clicks(login_button).subscribe({startActivity(Intent(this, javaClass<MainActivity>()))})
         //        val usernameObservable: Observable<String> = WidgetObservable.text(username_edit, true).map({it.text().toString()})
+
+
     }
+
+    fun validateEmail(email: String) : Boolean = email.contains("@");
 }
 
