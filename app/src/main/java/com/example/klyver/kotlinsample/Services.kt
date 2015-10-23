@@ -44,7 +44,7 @@ object GitHubDataProvider {
     val TAG = "GitHubDataProvider";
 
     val restAdapter: RestAdapter = RestAdapter.Builder().setEndpoint("https://api.github.com").build()
-    val githubService: GitHubService = restAdapter.create(javaClass<GitHubService>())
+    val githubService: GitHubService = restAdapter.create(GitHubService::class.java)
 
     fun findUsersWithCompleteDetails(query: String): Observable<List<GithubUser>> =
         findUsers(query)
@@ -57,13 +57,13 @@ object GitHubDataProvider {
 
     fun findUsers(query: String): Observable<List<GithubUser>> =
         githubService.searchUsers(query).map({ jsonElement: JsonElement ->
-            val items: JsonArray = jsonElement.getAsJsonObject().get("items").getAsJsonArray()
+            val items: JsonArray = jsonElement.asJsonObject.get("items").asJsonArray
             items.map {             
                 GithubUser(
-                        it.getAsJsonObject().get("login").getAsString(),
-                        it.getAsJsonObject().get("avatar_url").getAsString(),
-                        it.getAsJsonObject().get("followers_url").getAsString(),
-                        it.getAsJsonObject().get("repos_url").getAsString(),
+                        it.asJsonObject.get("login").asString,
+                        it.asJsonObject.get("avatar_url").asString,
+                        it.asJsonObject.get("followers_url").asString,
+                        it.asJsonObject.get("repos_url").asString,
                         null,
                         null)
             }
@@ -93,15 +93,15 @@ object GitHubDataProvider {
             return githubService.user(loginname)
                     .map({ jsonElement: JsonElement ->
                         Log.d(TAG, "got user detail: $loginname")
-                        val locationElem: JsonElement? = jsonElement.getAsJsonObject().get("location")
-                        val location: String? = if (locationElem == null || locationElem.isJsonNull()) null else locationElem.getAsString()
-                        val emailElem: JsonElement? = jsonElement.getAsJsonObject().get("email")
-                        val email: String? = if (emailElem == null || emailElem.isJsonNull()) null else emailElem.getAsString()
+                        val locationElem: JsonElement? = jsonElement.asJsonObject.get("location")
+                        val location: String? = if (locationElem == null || locationElem.isJsonNull) null else locationElem.asString
+                        val emailElem: JsonElement? = jsonElement.asJsonObject.get("email")
+                        val email: String? = if (emailElem == null || emailElem.isJsonNull) null else emailElem.asString
                         GithubUser(
-                                jsonElement.getAsJsonObject().get("login").getAsString(),
-                                jsonElement.getAsJsonObject().get("avatar_url").getAsString(),
-                                jsonElement.getAsJsonObject().get("followers_url").getAsString(),
-                                jsonElement.getAsJsonObject().get("repos_url").getAsString(),
+                                jsonElement.asJsonObject.get("login").asString,
+                                jsonElement.asJsonObject.get("avatar_url").asString,
+                                jsonElement.asJsonObject.get("followers_url").asString,
+                                jsonElement.asJsonObject.get("repos_url").asString,
                                 location,
                                 email)
                     })
@@ -110,15 +110,15 @@ object GitHubDataProvider {
     fun getFollowers(loginname: String): Observable<List<GithubUser>> =
             githubService.followers(loginname)
                     .map({ jsonElement: JsonElement ->
-                        val jsonArray: JsonArray = jsonElement.getAsJsonArray()
+                        val jsonArray: JsonArray = jsonElement.asJsonArray
                         val res: ArrayList<GithubUser> = ArrayList()
                         for (i in jsonArray) {
-                            val elem = i.getAsJsonObject()
+                            val elem = i.asJsonObject
                             res.add(GithubUser(
-                                    elem.get("login").getAsString(),
-                                    elem.get("avatar_url").getAsString(),
-                                    elem.get("followers_url").getAsString(),
-                                    elem.get("repos_url").getAsString(),
+                                    elem.get("login").asString,
+                                    elem.get("avatar_url").asString,
+                                    elem.get("followers_url").asString,
+                                    elem.get("repos_url").asString,
                                     "",
                                     null))
                         }

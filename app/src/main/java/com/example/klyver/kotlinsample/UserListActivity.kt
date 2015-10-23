@@ -20,9 +20,9 @@ public class UserListActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_github_user_list)
-        recycler_view.setLayoutManager(LinearLayoutManager(this))
+        recycler_view.layoutManager = LinearLayoutManager(this)
         recycler_view.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-        recycler_view.setItemAnimator(DefaultItemAnimator());
+        recycler_view.itemAnimator = DefaultItemAnimator();
 
         subscription = Events.text(search_field)
                 .filter{ it.length() >= 3 }
@@ -33,7 +33,7 @@ public class UserListActivity : Activity() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ list: List<GithubUser> ->
-                    recycler_view.setAdapter(UserListAdapter(this, list))
+                    recycler_view.adapter = UserListAdapter(this, list)
                 }, {
                     Toast.makeText(this, "An error happened, try again later", Toast.LENGTH_LONG).show()
                 }, {
