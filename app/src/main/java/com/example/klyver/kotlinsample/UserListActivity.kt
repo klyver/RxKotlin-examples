@@ -25,7 +25,7 @@ public class UserListActivity : Activity() {
         recycler_view.itemAnimator = DefaultItemAnimator();
 
         subscription = Events.text(search_field)
-                .filter{ it.length() >= 3 }
+                .filter{ it.length >= 3 }
                 .debounce(500, TimeUnit.MILLISECONDS)
                 .flatMap {
                     GitHubDataProvider.findUsersWithCompleteDetails(it)

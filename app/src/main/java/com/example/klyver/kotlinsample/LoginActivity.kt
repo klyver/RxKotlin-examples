@@ -8,6 +8,7 @@ import kotlinx.android.synthetic.activity_login.email_edit_text
 import kotlinx.android.synthetic.activity_login.login_button
 import kotlinx.android.synthetic.activity_login.password_edit_text
 import rx.Observable
+import rx.subjects.BehaviorSubject
 
 public class LoginActivity: Activity() {
 
@@ -18,19 +19,20 @@ public class LoginActivity: Activity() {
 
         val usernameObservable = Events.text(email_edit_text)
         val passwordObservable = Events.text(password_edit_text)
+        val loginExecutingObservable: BehaviorSubject<Boolean> = BehaviorSubject.create(false)
 
         Observable
-                .combineLatest(usernameObservable, passwordObservable, {
-                    email, password -> validateEmail(email) && password.length() >= 4
+                .combineLatest(usernameObservable, passwordObservable, loginExecutingObservable, {
+                    email, password, loginExecuting -> validateEmail(email) && password.length >= 4 && !loginExecuting
                 }).subscribe({
                     login_button.isEnabled = it
                 })
-
 
         login_button.setOnClickListener {
             val email = email_edit_text.editableText.toString()
             val password = password_edit_text.editableText.toString()
 
+            loginExecutingObservable.onNext(true)
             LoginService.login(email, password)
                     .subscribe({
                         if (it) {
@@ -38,8 +40,10 @@ public class LoginActivity: Activity() {
                         } else {
                             Toast.makeText(this, "Wrong email or password", Toast.LENGTH_LONG).show();
                         }
+                        loginExecutingObservable.onNext(false)
                     }, {
                         Toast.makeText(this, "Something went wrong, try again later", Toast.LENGTH_LONG).show();
+                        loginExecutingObservable.onNext(false)
                     })
         }
 
@@ -49,6 +53,6 @@ public class LoginActivity: Activity() {
 
     }
 
-    fun validateEmail(email: String) : Boolean = email.contains("@");
+    fun validateEmail(email: String) : Boolean = email.contains("@")
 }
 
