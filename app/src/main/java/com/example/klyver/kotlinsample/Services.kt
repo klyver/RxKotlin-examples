@@ -18,7 +18,7 @@ object LoginService {
     fun login(email: String, password: String) = observable<Boolean> {
         it.onNext(true)
         it.onCompleted()
-//        it.onError()
+//        it.onError(Exception("network error"))
     }
 
 }

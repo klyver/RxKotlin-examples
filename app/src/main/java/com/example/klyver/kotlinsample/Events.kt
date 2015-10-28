@@ -14,7 +14,7 @@ import rx.subjects.Subject
 public class Events {
     companion object Events {
         public fun text(editText: EditText): Observable<String> {
-            val behaviourSubject: BehaviorSubject<String> = BehaviorSubject.create(editText.getText().toString());
+            val behaviourSubject: BehaviorSubject<String> = BehaviorSubject.create(editText.text.toString());
             editText.addTextChangedListener(object : TextWatcher {
                 override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                 }
