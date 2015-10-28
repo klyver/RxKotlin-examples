@@ -24,7 +24,7 @@ public class UserListActivity : Activity() {
         recycler_view.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
         recycler_view.itemAnimator = DefaultItemAnimator();
 
-        subscription = Events.text(search_field)
+        subscription = search_field.textObservable()
                 .filter{ it.length >= 3 }
                 .debounce(500, TimeUnit.MILLISECONDS)
                 .flatMap {

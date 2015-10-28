@@ -48,14 +48,11 @@ public class UserDetailActivity : Activity() {
                 })
 
 
-
-
-        val clickedDetailObservable = Events.click(show_followers_button)
         val followersReadyObservable: Observable<List<GithubUser>?> = GitHubDataProvider.getFollowers(loginname)
 //                .onErrorReturn({null})
                 .subscribeOn(Schedulers.io())
 
-        val clickedAndDataReadyObservable: Observable<List<GithubUser>> = Observable.zip(clickedDetailObservable, followersReadyObservable, { c, d -> d })
+        val clickedAndDataReadyObservable: Observable<List<GithubUser>> = Observable.zip(show_followers_button.clickObservable(), followersReadyObservable, { c, d -> d })
         followersSubscription = clickedAndDataReadyObservable
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe ({

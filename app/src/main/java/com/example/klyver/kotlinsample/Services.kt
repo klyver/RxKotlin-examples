@@ -24,27 +24,27 @@ object LoginService {
 }
 
 
-interface GitHubService {
+interface GitHubAPI {
     @GET("/users/{user}")
-    fun user(@Path("user") user: String): Observable<JsonElement>;
+    fun user(@Path("user") user: String): Observable<JsonElement>
 
     @GET("/users/{user}/followers")
-    fun followers(@Path("user") user: String): Observable<JsonElement>;
+    fun followers(@Path("user") user: String): Observable<JsonElement>
 
     @GET("/users/{repos}/repos")
-    fun repos(@Path("user") user: String): Observable<JsonElement>;
+    fun repos(@Path("user") user: String): Observable<JsonElement>
 
     @GET("/search/users")
-    fun searchUsers(@Query("q") query: String): Observable<JsonElement>;
+    fun searchUsers(@Query("q") query: String): Observable<JsonElement>
 
 }
 
 
-object GitHubDataProvider {
-    val TAG = "GitHubDataProvider";
+object GitHubDataProvider {   // manager
+    val TAG = "GitHubDataProvider"
 
     val restAdapter: RestAdapter = RestAdapter.Builder().setEndpoint("https://api.github.com").build()
-    val githubService: GitHubService = restAdapter.create(GitHubService::class.java)
+    val githubAPI: GitHubAPI = restAdapter.create(GitHubAPI::class.java)
 
     fun findUsersWithCompleteDetails(query: String): Observable<List<GithubUser>> =
         findUsers(query)
@@ -56,7 +56,7 @@ object GitHubDataProvider {
 
 
     fun findUsers(query: String): Observable<List<GithubUser>> =
-        githubService.searchUsers(query).map({ jsonElement: JsonElement ->
+        githubAPI.searchUsers(query).map({ jsonElement: JsonElement ->
             val items: JsonArray = jsonElement.asJsonObject.get("items").asJsonArray
             items.map {             
                 GithubUser(
@@ -77,7 +77,7 @@ object GitHubDataProvider {
     fun getUser(user: GithubUser): Observable<GithubUser> =
             getUser(user.login)
                 .doOnError({
-                    Log.d(TAG, "error getting ${user.login} ${it.getMessage()}")
+                    Log.d(TAG, "error getting ${user.login} ${it.message}")
                 })
                 .onErrorReturn({
                     /*
@@ -90,7 +90,7 @@ object GitHubDataProvider {
 
 
     fun getUser(loginname: String): Observable<GithubUser> {
-            return githubService.user(loginname)
+            return githubAPI.user(loginname)
                     .map({ jsonElement: JsonElement ->
                         Log.d(TAG, "got user detail: $loginname")
                         val locationElem: JsonElement? = jsonElement.asJsonObject.get("location")
@@ -108,7 +108,7 @@ object GitHubDataProvider {
     }
 
     fun getFollowers(loginname: String): Observable<List<GithubUser>> =
-            githubService.followers(loginname)
+            githubAPI.followers(loginname)
                     .map({ jsonElement: JsonElement ->
                         val jsonArray: JsonArray = jsonElement.asJsonArray
                         val res: ArrayList<GithubUser> = ArrayList()

@@ -16,13 +16,10 @@ public class LoginActivity: Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-
-        val usernameObservable = Events.text(email_edit_text)
-        val passwordObservable = Events.text(password_edit_text)
         val loginExecutingObservable: BehaviorSubject<Boolean> = BehaviorSubject.create(false)
 
         Observable
-                .combineLatest(usernameObservable, passwordObservable, loginExecutingObservable, {
+                .combineLatest(email_edit_text.textObservable(), password_edit_text.textObservable(), loginExecutingObservable, {
                     email, password, loginExecuting -> validateEmail(email) && password.length >= 4 && !loginExecuting
                 }).subscribe({
                     login_button.isEnabled = it
@@ -46,11 +43,6 @@ public class LoginActivity: Activity() {
                         loginExecutingObservable.onNext(false)
                     })
         }
-
-        //        ViewObservable.clicks(login_button).subscribe({startActivity(Intent(this, javaClass<MainActivity>()))})
-        //        val usernameObservable: Observable<String> = WidgetObservable.text(username_edit, true).map({it.text().toString()})
-
-
     }
 
     fun validateEmail(email: String) : Boolean = email.contains("@")
